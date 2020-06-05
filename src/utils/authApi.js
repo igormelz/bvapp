@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useKeycloak } from '@react-keycloak/web'
 
-export const useApi = (baseURL) => {
+export const useAuthApi = () => {
   const [keycloak, initialized] = useKeycloak()
   const [axiosInstance, setAxiosInstance] = useState({})
 
   useEffect(() => {
     const instance = axios.create({
-      baseURL,
+      baseURL: process.env.REACT_APP_SECURE_API_URL,
       headers: {
         Authorization: initialized ? `Bearer ${keycloak.token}` : undefined,
       },
@@ -19,7 +19,7 @@ export const useApi = (baseURL) => {
     return () => {
       setAxiosInstance({})
     }
-  }, [baseURL, initialized, keycloak, keycloak.token])
+  }, [initialized, keycloak, keycloak.token])
 
   return axiosInstance.instance
 }

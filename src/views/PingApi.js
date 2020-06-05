@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from "react";
-import { useApi } from "../utils/api";
+import { useAuthApi } from "../utils/authApi";
 
 function PingApi() {
   const [userInfo, setUserInfo] = useState(null);
-  const axiosInstance = useApi(process.env.REACT_APP_SECURE_API_URL);
+  const axiosInstance = useAuthApi();
 
   const callApi = useCallback(() => {
     axiosInstance

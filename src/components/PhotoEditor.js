@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useApi } from "../utils/api";
+import { useAuthApi } from "../utils/authApi";
 import {
   Drawer,
   Button,
@@ -12,7 +12,7 @@ import {
 } from "rsuite";
 
 const PhotoEditor = ({ photo, onClose, onSubmit }) => {
-  const api = useApi(process.env.REACT_APP_SECURE_API_URL);
+  const api = useAuthApi();
   const form = useRef(null);
   const [formData, setFormData] = useState({
     title: photo.title,

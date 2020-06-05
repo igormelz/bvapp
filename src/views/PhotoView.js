@@ -13,8 +13,9 @@ import {
   Alert,
   Col,
 } from "rsuite";
+import { fmtDate, downloadFile } from "../utils/helper";
 import axios from "axios";
-import { useApi } from "../utils/api";
+import { useAuthApi } from "../utils/authApi";
 import { useKeycloak } from "@react-keycloak/web";
 import "./Photo.css";
 import PhotoEditor from "../components/PhotoEditor";
@@ -27,11 +28,6 @@ const Card = (props) => (
   </Panel>
 );
 
-const fmtTime = (str) => {
-  const d = new Date(str);
-  return d.toLocaleDateString();
-};
-
 const PhotoView = () => {
   const [keycloak] = useKeycloak();
   const history = useHistory();
@@ -42,15 +38,14 @@ const PhotoView = () => {
   const [preview, setPreview] = useState();
   const [editor, setEditor] = useState(null);
   const [confirm, setConfirm] = useState(null);
-  const axiosInstance = useApi(process.env.REACT_APP_SECURE_API_URL);
+  const authApi = useAuthApi();
 
   const getData = () => {
-    axios
-      .get(`${process.env.REACT_APP_PUBLIC_API_URL}/public/photo/${id}`)
+    axios.get(`${process.env.REACT_APP_PUBLIC_API_URL}/public/photo/${id}`)
       .then((response) => {
         //console.log(response.data);
         setData(response.data.photo[0]);
-        setImage(response.data.photo[0].sizes.find((e) => e.type === "m"));
+        setImage(response.data.photo[0].sizes.find((e) => e.type === "w"));
         setLoading(false);
       })
       .catch(() => console.error("no answer"));
@@ -88,7 +83,7 @@ const PhotoView = () => {
 
   const canDelete = () => {
     setConfirm(null);
-    axiosInstance
+    authApi
       .delete(`/secure/photo/${id}`)
       .then(() => {
         Alert.info("Записи успешно удалены");
@@ -99,23 +94,14 @@ const PhotoView = () => {
       });
   };
 
-  const downloadFile = async (url) => {
-    const fileName = url.substring(url.lastIndexOf("/") + 1);
-    const { data } = await axios.get(url, { responseType: "blob" });
-    const blob = window.URL.createObjectURL(new Blob([data]));
-    const link = document.createElement("a");
-    link.href = blob;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
-  };
-
   if (loading) {
     return (
-      <FlexboxGrid justify="center">
+      <FlexboxGrid justify="space-around">
         <FlexboxGrid.Item colspan={6}>
           <Card />
+        </FlexboxGrid.Item>
+        <FlexboxGrid.Item colspan={6}>
+          <Placeholder.Paragraph />
         </FlexboxGrid.Item>
       </FlexboxGrid>
     );
@@ -152,7 +138,7 @@ const PhotoView = () => {
                 <FlexboxGrid.Item>
                   <div>
                     <div className="slimText">Загружено</div>
-                    <div>{fmtTime(data.date)}</div>
+                    <div>{fmtDate(data.date)}</div>
                   </div>
                 </FlexboxGrid.Item>
                 <FlexboxGrid.Item>
