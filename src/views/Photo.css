@@ -1,0 +1,21 @@
+.slimText {
+  font-size: 0.8em;
+  color: #97969b;
+  font-weight: 'lighter';
+  padding-top: 20px;
+}
+
+.titleStyle {
+  padding-bottom: 5;
+  white-space: "nowrap";
+  font-weight: 500;
+}
+
+.styleCenter {
+  display: "flex";
+  justify-content: "center";
+  height: "60px";
+  flex-direction: "column";
+  align-items: "flex-start";
+  overflow: "hidden";
+}
