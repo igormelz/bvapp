@@ -7,8 +7,9 @@ export const useAuthApi = () => {
   const [axiosInstance, setAxiosInstance] = useState({})
 
   useEffect(() => {
+    console.log("start authApi");
     const instance = axios.create({
-      baseURL: process.env.REACT_APP_SECURE_API_URL,
+      baseURL: process.env.REACT_APP_API_URL,
       headers: {
         Authorization: initialized ? `Bearer ${keycloak.token}` : undefined,
       },

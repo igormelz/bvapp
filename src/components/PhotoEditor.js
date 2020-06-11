@@ -9,7 +9,10 @@ import {
   FormControl,
   ButtonToolbar,
   Schema,
+  HelpBlock,
 } from "rsuite";
+
+//const isPub = (<Toggle defaultChecked/>);
 
 const PhotoEditor = ({ photo, onClose, onSubmit }) => {
   const api = useAuthApi();
@@ -17,12 +20,16 @@ const PhotoEditor = ({ photo, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     title: photo.title,
     text: photo.text,
+    source: photo.source,
+    author: photo.author,
   });
-  
+
   const { StringType } = Schema.Types;
   const model = Schema.Model({
     title: StringType().isRequired("Обязательно для заполнения"),
-    text: StringType()
+    text: StringType(),
+    source: StringType(),
+    author: StringType(),
   });
 
   const handleSubmit = () => {
@@ -31,17 +38,20 @@ const PhotoEditor = ({ photo, onClose, onSubmit }) => {
       return;
     }
     console.log("Try to update:" + photo.uid);
-    api.post(`/secure/photo/${photo.uid}`, formData).then(() =>{
-      console.log("SUCCESS");
-      onSubmit();
-    }).catch((err) => {
-      console.error(err);
-      onClose();
-    })
+    api
+      .post(`/photo/${photo.uid}`, formData)
+      .then(() => {
+        console.log("SUCCESS");
+        onSubmit();
+      })
+      .catch((err) => {
+        console.error(err);
+        onClose();
+      });
   };
 
   return (
-    <Drawer show={true} onHide={onClose}>
+    <Drawer show={true} onHide={onClose} size="xs">
       <Drawer.Header>
         <Drawer.Title>Редактировать описание</Drawer.Title>
       </Drawer.Header>
@@ -61,7 +71,18 @@ const PhotoEditor = ({ photo, onClose, onSubmit }) => {
           </FormGroup>
           <FormGroup>
             <ControlLabel>Описание</ControlLabel>
-            <FormControl rows={5} name="text" componentClass="textarea" />
+            <FormControl rows={5} name="text" componentClass="textarea"/>
+            <HelpBlock>Добавьте описание события</HelpBlock>
+          </FormGroup>
+          <FormGroup>
+            <ControlLabel>Ссылка на источник</ControlLabel>
+            <FormControl name="source" />
+            <HelpBlock>Референс, URL</HelpBlock>
+          </FormGroup>
+          <FormGroup>
+            <ControlLabel>Автор снимка</ControlLabel>
+            <FormControl name="author" />
+            <HelpBlock></HelpBlock>
           </FormGroup>
           <FormGroup>
             <ButtonToolbar>

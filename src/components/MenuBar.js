@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
 import { useKeycloak } from "@react-keycloak/web";
-import { Navbar, Nav, Icon, Dropdown } from "rsuite";
-import "./MenuBar.css";
+import { Navbar, Icon, Dropdown, Nav } from "rsuite";
 
 const MyLink = React.forwardRef((props, ref) => {
   const { href, as, ...rest } = props;
@@ -14,76 +14,134 @@ const MyLink = React.forwardRef((props, ref) => {
 });
 
 const NavLink = (props) => <Nav.Item componentClass={MyLink} {...props} />;
-const UserLink = (props) => (
+const DropLink = (props) => (
   <Dropdown.Item componentClass={MyLink} {...props} />
 );
 
-const UserInfo = () => {
-  const { keycloak, initialized } = useKeycloak();
+const Mobile = ({ userInfo, login, logout }) => (
+  <Navbar appearance="inverse">
+    <Navbar.Header>
+      <Link to="/">
+        <div style={{ padding: "18px 40px" }}>
+          <img src="/Submarine.svg" alt="logo" height={20} width={140} />
+        </div>
+      </Link>
+    </Navbar.Header>
+    <Navbar.Body>
+      <Nav pullRight>
+        <Dropdown icon={<Icon icon="bars" />} placement="bottomEnd">
+          <DropLink icon={<Icon icon="image" />} href="/photo">
+            Фото архив
+          </DropLink>
+          {!userInfo && (
+            <Dropdown.Item icon={<Icon icon="sign-in" />} onClick={login}>
+              Вход
+            </Dropdown.Item>
+          )}
+          {userInfo && (
+            <Dropdown.Menu
+              title={userInfo.username}
+              icon={<Icon icon="user" />}
+              pullLeft
+            >
+              <DropLink icon={<Icon icon="upload" />} href="/upload/photo">
+                Загрузить фото
+              </DropLink>
+              <Dropdown.Item divider />
+              <DropLink href="/profile" icon={<Icon icon="profile" />}>
+                Your Profile
+              </DropLink>
+              <Dropdown.Item onClick={logout} icon={<Icon icon="sign-out" />}>
+                Выход
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          )}
+        </Dropdown>
+      </Nav>
+    </Navbar.Body>
+  </Navbar>
+);
 
-  if (!initialized || !keycloak.authenticated) {
+const Default = ({ userInfo, login, logout }) => (
+  <Navbar>
+    <Navbar.Header>
+      <Nav>
+        <Link to="/">
+          <img src="/brand.png" alt="logo" />
+        </Link>
+      </Nav>
+    </Navbar.Header>
+    <Navbar.Body>
+      <Nav>
+        <NavLink icon={<Icon icon="image" />} href="/photo">
+          Фото архив
+        </NavLink>
+      </Nav>
+      <Nav pullRight>
+        {!userInfo && (
+          <Nav.Item icon={<Icon icon="sign-in" />} onClick={login}>
+            Вход
+          </Nav.Item>
+        )}
+        {userInfo && (
+          <Dropdown
+            title={userInfo.username}
+            icon={<Icon icon="user" />}
+            placement="bottomEnd"
+          >
+            <DropLink icon={<Icon icon="upload" />} href="/upload/photo">
+              Загрузить фото
+            </DropLink>
+            <Dropdown.Item divider />
+            <DropLink href="/profile" icon={<Icon icon="profile" />}>
+              Your Profile
+            </DropLink>
+            <Dropdown.Item onClick={logout} icon={<Icon icon="sign-out" />}>
+              Выход
+            </Dropdown.Item>
+          </Dropdown>
+        )}
+      </Nav>
+    </Navbar.Body>
+  </Navbar>
+);
+
+const MenuBar = () => {
+  const { keycloak, initialized } = useKeycloak();
+  const [userInfo, setUserInfo] = useState(null);
+  const isMobile = useMediaQuery({ maxWidth: 767 });
+
+  useEffect(() => {
+    const getProfile = async () => {
+      const profile = await keycloak.loadUserProfile();
+      setUserInfo(profile);
+    };
+
+    if (initialized) {
+      getProfile();
+    }
+
+    return () => {
+      setUserInfo(null);
+    };
+  }, [initialized, keycloak]);
+
+  if (isMobile) {
     return (
-      <Nav.Item icon={<Icon icon="sign-in" />} onClick={() => keycloak.login()}>
-        Вход для пользователей
-      </Nav.Item>
+      <Mobile
+        userInfo={userInfo}
+        login={() => keycloak.login()}
+        logout={() => keycloak.logout()}
+      />
     );
   }
 
   return (
-    <Dropdown
-      title="{userInfo.username}"
-      icon={<Icon icon="user" />}
-      placement="bottomEnd"
-    >
-      <Dropdown.Item panel style={{ padding: 10, width: 160 }}>
-        <p>Signed in as</p>
-        <strong>userInfo</strong>
-      </Dropdown.Item>
-      <Dropdown.Item divider />
-      <UserLink href="/profile" icon={<Icon icon="profile" />}>
-        Your Profile
-      </UserLink>
-      <Dropdown.Item
-        onClick={() => keycloak.logout()}
-        icon={<Icon icon="sign-out" />}
-      >
-        Выход
-      </Dropdown.Item>
-    </Dropdown>
+    <Default
+      userInfo={userInfo}
+      login={() => keycloak.login()}
+      logout={() => keycloak.logout()}
+    />
   );
 };
-
-const MenuBar = () => {
-  const { keycloak } = useKeycloak();
-
-  return (
-    <Navbar appearance="inverse">
-      <Navbar.Header>
-        <span className="navbar-brand logo">BalticVaryag</span>
-      </Navbar.Header>
-      <Navbar.Body>
-        <Nav>
-          <NavLink href="/" icon={<Icon icon="home" />}>
-            Home
-          </NavLink>
-          <NavLink href="/photos" icon={<Icon icon="image" />}>
-            Фото
-          </NavLink>
-          {keycloak.authenticated && (
-            <NavLink href="/pingapi">Call Api</NavLink>
-          )}
-          {keycloak.authenticated && (
-            <NavLink href="/upload/photo" icon={<Icon icon="cloud-upload" />}>
-              Загрузить
-            </NavLink>
-          )}
-        </Nav>
-        <Nav pullRight>
-          <UserInfo />
-        </Nav>
-      </Navbar.Body>
-    </Navbar>
-  );
-};
-
 export default MenuBar;

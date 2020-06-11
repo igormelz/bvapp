@@ -3,7 +3,7 @@ import { Uploader, Alert } from "rsuite";
 import { useKeycloak } from "@react-keycloak/web";
 
 const styles = {
-  lineHeight: "200px",
+  lineHeight: "400px",
 };
 
 const UploadImage = ({ history }) => {
@@ -15,8 +15,10 @@ const UploadImage = ({ history }) => {
   };
 
   const updateTitle = (e) => {
-    const name = e[e.length - 1].name;
-    setTitle({ title: encodeURI(name) });
+    if (Array.isArray(e) && e.length > 0) {
+      const name = e[e.length - 1].name;
+      setTitle({ title: encodeURI(name) });
+    }
   };
 
   if (!initialized) {
@@ -26,21 +28,21 @@ const UploadImage = ({ history }) => {
   return (
     <Uploader
       draggable
-      action={`${process.env.REACT_APP_SECURE_API_URL}/secure/upload`}
+      action={`${process.env.REACT_APP_API_URL}/photo/upload`}
       headers={authHeader}
       data={title}
       accept="image/*"
       onChange={updateTitle}
       onSuccess={(response) => {
         console.log(response);
-        history.push("/photo/"+response);
+        history.push("/photo/" + response);
       }}
-      onError={(err)=>{
+      onError={(err) => {
         // console.log(err);
         Alert.error(err.response);
       }}
     >
-      <div style={styles}>Click or Drag files to this area to upload</div>
+      <div style={styles}>Нажмите или перетащите файл для начала загрузки</div>
     </Uploader>
   );
 };

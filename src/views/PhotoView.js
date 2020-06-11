@@ -41,7 +41,7 @@ const PhotoView = () => {
   const authApi = useAuthApi();
 
   const getData = () => {
-    axios.get(`${process.env.REACT_APP_PUBLIC_API_URL}/public/photo/${id}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/photo/public/${id}`)
       .then((response) => {
         //console.log(response.data);
         setData(response.data.photo[0]);
@@ -69,7 +69,7 @@ const PhotoView = () => {
     const { sub } = await keycloak.loadUserInfo();
     if (sub !== data.user.id && !keycloak.hasRealmRole("admin")) {
       Alert.warning(
-        "Только редактор может редактирать данные другого пользователя"
+        "Только редактор может изменить данные другого пользователя"
       );
       return;
     }
@@ -84,10 +84,10 @@ const PhotoView = () => {
   const canDelete = () => {
     setConfirm(null);
     authApi
-      .delete(`/secure/photo/${id}`)
+      .delete(`/photo/${id}`)
       .then(() => {
         Alert.info("Записи успешно удалены");
-        history.push("/photos");
+        history.push("/photo");
       })
       .catch((error) => {
         Alert.error(error);
@@ -114,10 +114,10 @@ const PhotoView = () => {
   // };
 
   return (
-    <div style={{ margin: 20 }}>
+    <div style={{ margin: 'auto' }}>
       {/* photo */}
       <FlexboxGrid justify="space-around">
-        <FlexboxGrid.Item colspan={24} componentClass={Col} md={8}>
+        <FlexboxGrid.Item colspan={24} componentClass={Col} md={12}>
           <Panel style={{ display: "inline-block", width: image.width }}>
             <Whisper
               placement="bottom"
@@ -139,15 +139,6 @@ const PhotoView = () => {
                   <div>
                     <div className="slimText">Загружено</div>
                     <div>{fmtDate(data.date)}</div>
-                  </div>
-                </FlexboxGrid.Item>
-                <FlexboxGrid.Item>
-                  <div>
-                    <div className="slimText">Пользователем</div>
-                    <div>
-                      <Icon icon="user-circle-o" />
-                      {" " + data.user.name}
-                    </div>
                   </div>
                 </FlexboxGrid.Item>
                 <FlexboxGrid.Item>
@@ -200,13 +191,13 @@ const PhotoView = () => {
             </Panel>
           </Panel>
         </FlexboxGrid.Item>
-        <FlexboxGrid.Item colspan={24} componentClass={Col} md={8}>
+        <FlexboxGrid.Item colspan={24} componentClass={Col} md={12}>
           <PanelGroup accordion>
             <Panel header={data.title} defaultExpanded>
               {!data.text && <Placeholder.Paragraph />}
               {data.text && <p>{data.text}</p>}
             </Panel>
-            <Panel header="Инофрмация об источнике">
+            <Panel header="Дополнительная информация">
               <Placeholder.Paragraph />
             </Panel>
             <Panel header="Tags">

@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Panel, Grid, Row, Col, Icon } from "rsuite";
+import { Panel, Grid, Row, Col, Content,  } from "rsuite";
 import axios from "axios";
 import "./Photo.css";
 
-const Home = () => {
+const Photo = () => {
   const [data, setData] = useState();
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_PUBLIC_API_URL}/public/photo?t=s`)
+      .get(`${process.env.REACT_APP_API_URL}/photo/public?t=s`)
       .then((response) => {
-        //console.log(response);
         setData(response.data.photo);
       })
       .catch(() => console.error("no answer"));
@@ -21,14 +20,8 @@ const Home = () => {
     };
   }, []);
 
-  const fmtDate = (str) => {
-    const d = new Date(str);
-    return d.toLocaleDateString(); //+ " " + d.toLocaleTimeString();
-  };
-
-  //const fmtSize = (size) => numeral(size).format("0.0 b");
-
   return (
+      <Content>
     <Panel header="Фото архив">
       <Grid fluid>
         <Row>
@@ -50,13 +43,6 @@ const Home = () => {
                   </Link>
                   <Panel header={item.title}>
                     <div>{item.text}</div>
-                    <div className="slimText">
-                      <div>
-                        <Icon icon="user-circle-o" />
-                        {" " + item.user.name}
-                      </div>
-                      <div>{fmtDate(item.date)}</div>
-                    </div>
                   </Panel>
                 </Panel>
               </Col>
@@ -64,7 +50,8 @@ const Home = () => {
         </Row>
       </Grid>
     </Panel>
+    </Content>
   );
 };
 
-export default Home;
+export default Photo;

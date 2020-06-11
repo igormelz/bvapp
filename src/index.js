@@ -3,8 +3,10 @@ import ReactDOM from "react-dom";
 import * as serviceWorker from "./serviceWorker";
 import Keycloak from "keycloak-js";
 import { KeycloakProvider } from "@react-keycloak/web";
+import "rsuite/lib/styles/index.less";
+import ruRU from "rsuite/lib/IntlProvider/locales/ru_RU";
+import { IntlProvider } from "rsuite";
 import App from "./App";
-
 
 const keycloak = new Keycloak({
   realm: process.env.REACT_APP_KEYCLOAK_REALM,
@@ -13,12 +15,18 @@ const keycloak = new Keycloak({
 });
 
 const onKeycloakEvent = (event, error) => {
-  console.log('onKeycloakEvent', event, error)
-}
+  console.log("onKeycloakEvent", event, error);
+};
 
 ReactDOM.render(
-  <KeycloakProvider keycloak={keycloak} initConfig={{ onLoad: "check-sso" }} onEvent={onKeycloakEvent}>
-    <App />
+  <KeycloakProvider
+    keycloak={keycloak}
+    initConfig={{ onLoad: "check-sso" }}
+    onEvent={onKeycloakEvent}
+  >
+    <IntlProvider locale={ruRU}>
+      <App />
+    </IntlProvider>
   </KeycloakProvider>,
   document.getElementById("root")
 );
