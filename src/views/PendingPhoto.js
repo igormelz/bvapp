@@ -5,20 +5,20 @@ import { useKeycloak } from "@react-keycloak/web";
 import PhotoList from "../components/PhotoList";
 
 
-const UserPhoto = () => {
+const PendingPhoto = () => {
   const [keycloak, initialized] = useKeycloak();
   const [ loading, setLoading ] = useState(true);
   const [data, setData] = useState([]);
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/photo`, {
+      .get(`${process.env.REACT_APP_API_URL}/photo/review`, {
         headers: {
           Authorization: initialized ? `Bearer ${keycloak.token}` : undefined,
         },
       })
       .then((result) => {
-        setData(result.data.my.slice(0,1));
+        setData(result.data.photo);
         setLoading(false);
       });
 
@@ -42,9 +42,9 @@ const UserPhoto = () => {
       <Header>
         <h3>Мои фото</h3>
       </Header>
-      <PhotoList target="/my/photo" data={data.photo}/> 
+      <PhotoList target="/my/photo" data={data}/> 
     </Container>
   );
 };
 
-export default UserPhoto;
+export default PendingPhoto;

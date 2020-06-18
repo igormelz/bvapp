@@ -1,32 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import {
+  Container,
+  Content,
   FlexboxGrid,
   Panel,
   Placeholder,
   Icon,
-  Tooltip,
-  Whisper,
+  Header,
+  Button,
   IconButton,
-  PanelGroup,
   ButtonToolbar,
   Alert,
   Col,
+  Navbar,
+  Nav,
 } from "rsuite";
-import { fmtDate, downloadFile } from "../utils/helper";
+import { downloadFile } from "../utils/helper";
 import axios from "axios";
 import { useAuthApi } from "../utils/authApi";
 import { useKeycloak } from "@react-keycloak/web";
-import "./Photo.css";
 import PhotoEditor from "../components/PhotoEditor";
 import PhotoPreview from "../components/PhotoPreview";
 import PhotoConfirmDelete from "../components/PhotoConfirmDelete";
+import { NavLink } from "../components/NavLink";
 
-const Card = (props) => (
-  <Panel {...props} header="Photo">
-    <Placeholder.Graph width={320} height={240} />
-  </Panel>
-);
+const slimText = {
+  fontSize: "0.8em",
+  color: "#97969b",
+  fontWeight: "lighter",
+};
 
 const PhotoView = () => {
   const [keycloak] = useKeycloak();
@@ -41,11 +44,12 @@ const PhotoView = () => {
   const authApi = useAuthApi();
 
   const getData = () => {
-    axios.get(`${process.env.REACT_APP_API_URL}/photo/public/${id}`)
+    axios
+      .get(`${process.env.REACT_APP_API_URL}/photo/public/${id}`)
       .then((response) => {
         //console.log(response.data);
         setData(response.data.photo[0]);
-        setImage(response.data.photo[0].sizes.find((e) => e.type === "w"));
+        setImage(response.data.photo[0].sizes.find((e) => e.type === "z"));
         setLoading(false);
       })
       .catch(() => console.error("no answer"));
@@ -96,137 +100,131 @@ const PhotoView = () => {
 
   if (loading) {
     return (
-      <FlexboxGrid justify="space-around">
-        <FlexboxGrid.Item colspan={6}>
-          <Card />
-        </FlexboxGrid.Item>
-        <FlexboxGrid.Item colspan={6}>
-          <Placeholder.Paragraph />
-        </FlexboxGrid.Item>
-      </FlexboxGrid>
+      <Container style={{ margin: "auto", padding: "20px 60px 20px 60px" }}>
+        <Placeholder.Paragraph
+          style={{ marginTop: 30 }}
+          graph="image"
+          rows={5}
+        />
+      </Container>
     );
   }
 
-  // const pStyle = {
-  //   display: "inline-block",
-  //   //backgroundImage: 'url(' + data.img[0].url + ')',
-  //   width: data.img[0].width,
-  // };
-
   return (
-    <div style={{ margin: 'auto' }}>
-      {/* photo */}
-      <FlexboxGrid justify="space-around">
-        <FlexboxGrid.Item colspan={24} componentClass={Col} md={12}>
-          <Panel style={{ display: "inline-block", width: image.width }}>
-            <Whisper
-              placement="bottom"
-              trigger="hover"
-              speaker={<Tooltip>Click to preview</Tooltip>}
-            >
-              <div
-                style={{ cursor: "pointer " }}
-                onClick={() =>
-                  setPreview(data.sizes.find((e) => e.type === "z"))
-                }
+    <Container style={{ margin: "auto" }}>
+      <Header>
+        <Navbar>
+          <Navbar.Header>
+            <div style={{ padding: "18px 20px", fontWeight: "bolder", overflow: 'hidden' }}>
+              <Icon icon="image" /> {data.title}
+            </div>
+          </Navbar.Header>
+          <Navbar.Body>
+            <Nav pullRight>
+              <NavLink
+                href="/my/photo"
+                icon={<Icon icon="chevron-circle-left" />}
               >
-                <img src={image.url} height={image.height} alt={data.title} />
-              </div>
-            </Whisper>
-            <Panel>
-              <FlexboxGrid justify="space-between">
-                <FlexboxGrid.Item>
-                  <div>
-                    <div className="slimText">Загружено</div>
-                    <div>{fmtDate(data.date)}</div>
-                  </div>
-                </FlexboxGrid.Item>
-                <FlexboxGrid.Item>
-                  <ButtonToolbar>
-                    <Whisper
-                      trigger="hover"
-                      preventOverflow
-                      placement="autoVertical"
-                      speaker={
-                        <Tooltip>
-                          {keycloak.authenticated
-                            ? "Редактировать описание"
-                            : "Для редактирования войдите на сайт"}
-                        </Tooltip>
-                      }
-                    >
-                      <IconButton
-                        icon={<Icon icon="edit" />}
-                        onClick={canEdit}
-                        disabled={!keycloak.authenticated}
-                      />
-                    </Whisper>
-                    <Whisper
-                      placement="autoVertical"
-                      trigger="hover"
-                      preventOverflow
-                      speaker={<Tooltip>Загрузить оригинал</Tooltip>}
-                    >
-                      <IconButton
-                        icon={<Icon icon="download" />}
-                        onClick={() => downloadFile(data.url)}
-                      />
-                    </Whisper>
-                    {keycloak.authenticated && keycloak.hasRealmRole("admin") && (
-                      <Whisper
-                        placement="autoVertical"
-                        trigger="hover"
-                        preventOverflow
-                        speaker={<Tooltip>Удалить</Tooltip>}
-                      >
-                        <IconButton
-                          icon={<Icon icon="trash-o" />}
-                          onClick={() => setConfirm(true)}
-                        />
-                      </Whisper>
-                    )}
-                  </ButtonToolbar>
-                </FlexboxGrid.Item>
-              </FlexboxGrid>
+                К списку
+              </NavLink>
+              <Nav.Item icon={<Icon icon="edit" />}>Редактировать</Nav.Item>
+              <Nav.Item icon={<Icon icon="check-square" />}>
+                Опубликовать
+              </Nav.Item>
+            </Nav>
+          </Navbar.Body>
+        </Navbar>
+      </Header>
+      <Content style={{ padding: "20px" }}>
+        <FlexboxGrid justify="space-around">
+          <FlexboxGrid.Item
+            componentClass={Col}
+            colspan={24}
+            md={12}
+            style={{ display: "inline-block" }}
+          >
+            <img
+              src={image.url}
+              alt={data.title}
+              style={{ maxWidth: "100%", margin: "auto" }}
+            />
+            <Button
+              appearance="subtle"
+              style={{ paddingTop: "10px" }}
+              onClick={() => downloadFile(data.url)}
+            >
+              <Icon icon="download" /> Получить оригинал{" "}
+              <span style={slimText}>
+                ({data.width} x {data.height} px)
+              </span>
+            </Button>
+            <Panel header="Лицензия">
+              <a
+                rel="license"
+                href="http://creativecommons.org/licenses/by/4.0/"
+              >
+                <img
+                  alt="Лицензия Creative Commons"
+                  src="https://i.creativecommons.org/l/by/4.0/88x31.png"
+                />
+              </a>
+              <br />
+              Это произведение доступно по{" "}
+              <a
+                rel="license"
+                href="http://creativecommons.org/licenses/by/4.0/"
+              >
+                лицензии Creative Commons «Attribution» («Атрибуция») 4.0
+                Всемирная
+              </a>
+              .
             </Panel>
-          </Panel>
-        </FlexboxGrid.Item>
-        <FlexboxGrid.Item colspan={24} componentClass={Col} md={12}>
-          <PanelGroup accordion>
-            <Panel header={data.title} defaultExpanded>
-              {!data.text && <Placeholder.Paragraph />}
-              {data.text && <p>{data.text}</p>}
+            <FlexboxGrid justify="space-between">
+              <FlexboxGrid.Item>
+                <ButtonToolbar>
+                  <IconButton
+                    icon={<Icon icon="edit" />}
+                    onClick={canEdit}
+                    disabled={!keycloak.authenticated}
+                  />
+                  {keycloak.authenticated && keycloak.hasRealmRole("admin") && (
+                    <IconButton
+                      icon={<Icon icon="trash-o" />}
+                      onClick={() => setConfirm(true)}
+                    />
+                  )}
+                </ButtonToolbar>
+              </FlexboxGrid.Item>
+            </FlexboxGrid>
+          </FlexboxGrid.Item>
+          <FlexboxGrid.Item componentClass={Col} colspan={24} md={12}>
+            <Panel header="Описание">
+              <p>{data.text}</p>
             </Panel>
-            <Panel header="Дополнительная информация">
-              <Placeholder.Paragraph />
-            </Panel>
-            <Panel header="Tags">
-              <Placeholder.Paragraph />
-            </Panel>
-          </PanelGroup>
-        </FlexboxGrid.Item>
-      </FlexboxGrid>
-      {editor && (
-        <PhotoEditor
-          photo={editor}
-          onClose={() => setEditor(null)}
-          onSubmit={reloadData}
-        />
-      )}
-      {confirm && (
-        <PhotoConfirmDelete
-          onConfirm={canDelete}
-          onCancel={() => setConfirm(null)}
-        />
-      )}
-      {preview && (
-        <PhotoPreview
-          title={data.title}
-          image={preview}
-          onClose={() => setPreview(null)}
-        />
-      )}
-    </div>
+          </FlexboxGrid.Item>
+        </FlexboxGrid>
+        {editor && (
+          <PhotoEditor
+            photo={editor}
+            onClose={() => setEditor(null)}
+            onSubmit={reloadData}
+          />
+        )}
+        {confirm && (
+          <PhotoConfirmDelete
+            onConfirm={canDelete}
+            onCancel={() => setConfirm(null)}
+          />
+        )}
+        {preview && (
+          <PhotoPreview
+            title={data.title}
+            image={preview}
+            onClose={() => setPreview(null)}
+          />
+        )}
+      </Content>
+    </Container>
   );
 };
 

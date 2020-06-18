@@ -35,7 +35,7 @@ const UploadImage = ({ history }) => {
       onChange={updateTitle}
       onSuccess={(response) => {
         console.log(response);
-        history.push("/photo/" + response);
+        history.push("/my/photo/" + response);
       }}
       onError={(err) => {
         // console.log(err);

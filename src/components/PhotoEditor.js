@@ -1,102 +1,93 @@
-import React, { useRef, useState } from "react";
-import { useAuthApi } from "../utils/authApi";
+import React, { useState } from "react";
 import {
-  Drawer,
   Button,
   Form,
   FormGroup,
   ControlLabel,
   FormControl,
   ButtonToolbar,
-  Schema,
   HelpBlock,
+  Icon,
+  Alert,
 } from "rsuite";
 
-//const isPub = (<Toggle defaultChecked/>);
-
-const PhotoEditor = ({ photo, onClose, onSubmit }) => {
-  const api = useAuthApi();
-  const form = useRef(null);
+const PhotoEditor = ({ editable, photo, onDone, api }) => {
+  //const form = useRef(null);
   const [formData, setFormData] = useState({
+    uid: photo.uid,
     title: photo.title,
-    text: photo.text,
+    text: photo.text ? photo.text : "",
+    place: photo.place,
     source: photo.source,
     author: photo.author,
-  });
-
-  const { StringType } = Schema.Types;
-  const model = Schema.Model({
-    title: StringType().isRequired("Обязательно для заполнения"),
-    text: StringType(),
-    source: StringType(),
-    author: StringType(),
+    license: photo.license,
   });
 
   const handleSubmit = () => {
-    if (!form.current.check()) {
-      console.log("ERROR");
-      return;
-    }
-    console.log("Try to update:" + photo.uid);
     api
-      .post(`/photo/${photo.uid}`, formData)
+      .post("/photo", formData)
       .then(() => {
         console.log("SUCCESS");
-        onSubmit();
+        Alert.info("Изменения сохранены");
+        onDone();
       })
       .catch((err) => {
         console.error(err);
-        onClose();
+        Alert.error("Something wrong");
       });
   };
 
   return (
-    <Drawer show={true} onHide={onClose} size="xs">
-      <Drawer.Header>
-        <Drawer.Title>Редактировать описание</Drawer.Title>
-      </Drawer.Header>
-      <Drawer.Body>
-        <Form
-          fluid
-          formValue={formData}
-          model={model}
-          ref={form}
-          onChange={(formValue) => {
-            setFormData(formValue);
-          }}
-        >
-          <FormGroup>
-            <ControlLabel>Краткое наименование</ControlLabel>
-            <FormControl name="title" />
-          </FormGroup>
-          <FormGroup>
-            <ControlLabel>Описание</ControlLabel>
-            <FormControl rows={5} name="text" componentClass="textarea"/>
-            <HelpBlock>Добавьте описание события</HelpBlock>
-          </FormGroup>
-          <FormGroup>
-            <ControlLabel>Ссылка на источник</ControlLabel>
-            <FormControl name="source" />
-            <HelpBlock>Референс, URL</HelpBlock>
-          </FormGroup>
-          <FormGroup>
-            <ControlLabel>Автор снимка</ControlLabel>
-            <FormControl name="author" />
-            <HelpBlock></HelpBlock>
-          </FormGroup>
-          <FormGroup>
-            <ButtonToolbar>
-              <Button appearance="primary" onClick={handleSubmit}>
-                Сохранить
-              </Button>
-              <Button appearance="subtle" onClick={onClose}>
-                Отменить
-              </Button>
-            </ButtonToolbar>
-          </FormGroup>
-        </Form>
-      </Drawer.Body>
-    </Drawer>
+    <Form
+      fluid
+      formValue={formData}
+      plaintext={!editable}
+      // model={model}
+      // ref={form}
+      onChange={(formValue) => {
+        setFormData(formValue);
+      }}
+    >
+      <FormGroup>
+        <ControlLabel>Название</ControlLabel>
+        <FormControl name="title" />
+        <HelpBlock>Обязательное поле</HelpBlock>
+      </FormGroup>
+      <FormGroup>
+        <ControlLabel>Описание</ControlLabel>
+        <FormControl rows={4} name="text" componentClass="textarea" />
+        <HelpBlock>Кратко опишите что на снимке, какое событие и т.д.</HelpBlock>
+      </FormGroup>
+      <FormGroup>
+        <ControlLabel>Место фотографии</ControlLabel>
+        <FormControl name="place" />
+        <HelpBlock>Если известно м.б. регион, город, ...</HelpBlock>
+      </FormGroup>
+      <FormGroup>
+        <ControlLabel>Ссылка или указание на первоисточник</ControlLabel>
+        <FormControl name="source" />
+      </FormGroup>
+      <FormGroup>
+        <ControlLabel>Автор</ControlLabel>
+        <FormControl name="author" />
+      </FormGroup>
+      <FormGroup>
+        <ControlLabel>Лицензия (если не CC-BY 4.0)</ControlLabel>
+        <FormControl name="license" />
+      </FormGroup>
+      {editable && (
+        <FormGroup>
+          <ButtonToolbar>
+            <Button appearance="primary" onClick={handleSubmit}>
+              <Icon icon="save" /> Сохранить
+            </Button>
+            <Button appearance="default" onClick={onDone}>
+              <Icon icon="ban" /> Отменить
+            </Button>
+          </ButtonToolbar>
+        </FormGroup>
+      )}
+    </Form>
   );
 };
 

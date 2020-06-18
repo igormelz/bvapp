@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Panel, Grid, Row, Col, Content,  } from "rsuite";
+import {
+  Placeholder,
+  Container,
+  Header,
+} from "rsuite";
 import axios from "axios";
-import "./Photo.css";
+import PhotoList from "../components/PhotoList";
 
 const Photo = () => {
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState();
 
   useEffect(() => {
@@ -12,6 +16,7 @@ const Photo = () => {
       .get(`${process.env.REACT_APP_API_URL}/photo/public?t=s`)
       .then((response) => {
         setData(response.data.photo);
+        setLoading(false);
       })
       .catch(() => console.error("no answer"));
 
@@ -20,37 +25,23 @@ const Photo = () => {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div>
+        <Placeholder.Paragraph style={{ marginTop: 30 }} graph="image" />
+        <Placeholder.Paragraph style={{ marginTop: 30 }} graph="image" />
+        <Placeholder.Paragraph style={{ marginTop: 30 }} graph="image" />
+      </div>
+    );
+  }
+
   return (
-      <Content>
-    <Panel header="Фото архив">
-      <Grid fluid>
-        <Row>
-          {data &&
-            data.map((item, index) => (
-              <Col md={4} key={index}>
-                <Panel
-                  shaded
-                  bordered
-                  bodyFill
-                  style={{
-                    display: "inline-block",
-                    maxWidth: 240,
-                    width: item.sizes[0].width,
-                  }}
-                >
-                  <Link to={`/photo/${item.uid}`}>
-                    <img src={item.sizes[0].url} alt={item.title} />
-                  </Link>
-                  <Panel header={item.title}>
-                    <div>{item.text}</div>
-                  </Panel>
-                </Panel>
-              </Col>
-            ))}
-        </Row>
-      </Grid>
-    </Panel>
-    </Content>
+    <Container style={{ padding: "20px 60px 20px 60px" }}>
+      <Header>
+        <h3>Фото архив</h3>
+      </Header>
+      <PhotoList target="/photo" data={data}/>
+    </Container>
   );
 };
 

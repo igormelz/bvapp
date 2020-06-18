@@ -2,21 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import { useKeycloak } from "@react-keycloak/web";
-import { Navbar, Icon, Dropdown, Nav } from "rsuite";
-
-const MyLink = React.forwardRef((props, ref) => {
-  const { href, as, ...rest } = props;
-  return (
-    <Link to={href} as={as} ref={ref} {...rest}>
-      {props.children}
-    </Link>
-  );
-});
-
-const NavLink = (props) => <Nav.Item componentClass={MyLink} {...props} />;
-const DropLink = (props) => (
-  <Dropdown.Item componentClass={MyLink} {...props} />
-);
+import { Header, Navbar, Icon, Dropdown, Nav } from "rsuite";
+import { NavLink, DropLink } from "./NavLink";
 
 const Mobile = ({ userInfo, login, logout }) => (
   <Navbar appearance="inverse">
@@ -47,9 +34,12 @@ const Mobile = ({ userInfo, login, logout }) => (
               <DropLink icon={<Icon icon="upload" />} href="/upload/photo">
                 Загрузить фото
               </DropLink>
+              <DropLink href="/my/photo" icon={<Icon icon="image" />}>
+                Мои фотографии
+              </DropLink>
               <Dropdown.Item divider />
               <DropLink href="/profile" icon={<Icon icon="profile" />}>
-                Your Profile
+                Профиль
               </DropLink>
               <Dropdown.Item onClick={logout} icon={<Icon icon="sign-out" />}>
                 Выход
@@ -62,8 +52,8 @@ const Mobile = ({ userInfo, login, logout }) => (
   </Navbar>
 );
 
-const Default = ({ userInfo, login, logout }) => (
-  <Navbar>
+const Default = ({ admin, userInfo, login, logout }) => (
+  <Navbar appearance="subtle">
     <Navbar.Header>
       <Nav>
         <Link to="/">
@@ -73,9 +63,7 @@ const Default = ({ userInfo, login, logout }) => (
     </Navbar.Header>
     <Navbar.Body>
       <Nav>
-        <NavLink icon={<Icon icon="image" />} href="/photo">
-          Фото архив
-        </NavLink>
+        <NavLink href="/photo">Фото архив</NavLink>
       </Nav>
       <Nav pullRight>
         {!userInfo && (
@@ -90,11 +78,21 @@ const Default = ({ userInfo, login, logout }) => (
             placement="bottomEnd"
           >
             <DropLink icon={<Icon icon="upload" />} href="/upload/photo">
-              Загрузить фото
+              Загрузить
             </DropLink>
+            <DropLink href="/my/photo" icon={<Icon icon="image" />}>
+              Черновики
+            </DropLink>
+            {admin && (
+              <Dropdown.Menu title="Редактор" pullLeft>
+              <DropLink href="/pending/photo" icon={<Icon icon="share-alt" />}>
+                Список на проверку
+              </DropLink>
+              </Dropdown.Menu>
+            )}
             <Dropdown.Item divider />
             <DropLink href="/profile" icon={<Icon icon="profile" />}>
-              Your Profile
+              Профиль
             </DropLink>
             <Dropdown.Item onClick={logout} icon={<Icon icon="sign-out" />}>
               Выход
@@ -109,12 +107,14 @@ const Default = ({ userInfo, login, logout }) => (
 const MenuBar = () => {
   const { keycloak, initialized } = useKeycloak();
   const [userInfo, setUserInfo] = useState(null);
-  const isMobile = useMediaQuery({ maxWidth: 767 });
+  const [admin, setAdmin] = useState(false);
+  const isMobile = useMediaQuery({ maxWidth: 400 });
 
   useEffect(() => {
     const getProfile = async () => {
       const profile = await keycloak.loadUserProfile();
       setUserInfo(profile);
+      setAdmin(keycloak.hasRealmRole("admin"));
     };
 
     if (initialized) {
@@ -128,20 +128,26 @@ const MenuBar = () => {
 
   if (isMobile) {
     return (
-      <Mobile
-        userInfo={userInfo}
-        login={() => keycloak.login()}
-        logout={() => keycloak.logout()}
-      />
+      <Header>
+        <Mobile
+          userInfo={userInfo}
+          admin={admin}
+          login={() => keycloak.login()}
+          logout={() => keycloak.logout()}
+        />
+      </Header>
     );
   }
 
   return (
-    <Default
-      userInfo={userInfo}
-      login={() => keycloak.login()}
-      logout={() => keycloak.logout()}
-    />
+    <Header>
+      <Default
+        userInfo={userInfo}
+        admin={admin}
+        login={() => keycloak.login()}
+        logout={() => keycloak.logout()}
+      />
+    </Header>
   );
 };
 export default MenuBar;
