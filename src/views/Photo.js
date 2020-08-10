@@ -13,7 +13,7 @@ const Photo = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/photo/public?t=s`)
+      .get(`${process.env.REACT_APP_API_URL}/public?t=s`)
       .then((response) => {
         setData(response.data.photo);
         setLoading(false);

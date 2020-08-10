@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^7.1.2",
     "axios": "^0.19.2",
     "customize-cra": "^1.0.0-alpha.0",
+    "esri-loader": "^2.14.0",
     "keycloak-js": "^10.0.1",
     "less": "^3.11.3",
     "less-loader": "^6.1.0",

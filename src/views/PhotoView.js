@@ -45,7 +45,7 @@ const PhotoView = () => {
 
   const getData = () => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/photo/public/${id}`)
+      .get(`${process.env.REACT_APP_API_URL}/public/photo/${id}`)
       .then((response) => {
         //console.log(response.data);
         setData(response.data.photo[0]);

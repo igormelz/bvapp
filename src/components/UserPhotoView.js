@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import {
   Container,
   Content,
@@ -18,11 +18,10 @@ import {
 import axios from "axios";
 import { useAuthApi } from "../utils/authApi";
 import { useKeycloak } from "@react-keycloak/web";
-import PhotoPreview from "../components/PhotoPreview";
-import PhotoEditor from "../components/PhotoEditor";
-import PhotoConfirmDelete from "../components/PhotoConfirmDelete";
-import PhotoConfirmPublish from "../components/PhotoConfirmPublish";
-import { NavLink } from "../components/NavLink";
+import PhotoPreview from "./PhotoPreview";
+import PhotoEditor from "./PhotoEditor";
+import PhotoConfirmDelete from "./PhotoConfirmDelete";
+import PhotoConfirmPublish from "./PhotoConfirmPublish";
 
 const slimText = {
   fontSize: "0.8em",
@@ -33,6 +32,7 @@ const slimText = {
 const PhotoView = () => {
   const [keycloak] = useKeycloak();
   const history = useHistory();
+  const location = useLocation();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [photo, setPhoto] = useState();
@@ -67,7 +67,7 @@ const PhotoView = () => {
 
   const getPhoto = () => {
     axios
-      .get(`${process.env.REACT_APP_API_URL}/photo/public/${id}`)
+      .get(`${process.env.REACT_APP_API_URL}/public/photo/${id}`)
       .then((response) => {
         //console.log(response.photo);
         setPhoto(response.data.photo[0]);
@@ -113,23 +113,29 @@ const PhotoView = () => {
   //   getData();
   // };
 
+  const goBack = () => {
+    if (location.state && location.state.target) {
+    history.push(location.state.target, location.state );
+    } else {
+      history.push("/user/photos");
+    }
+  }
 
-
-  const addReview = () => {
-    authApi
-      .post("/photo/review", {
-        comment: "готово к проверке",
-        uid: id,
-      })
-      .then(() => {
-        console.log("SUCCESS");
-        Alert.info("Изменения сохранены");
-      })
-      .catch((err) => {
-        console.error(err);
-        Alert.error("Something wrong");
-      });
-  };
+  // const addReview = () => {
+  //   authApi
+  //     .post("/photo/review", {
+  //       comment: "готово к проверке",
+  //       uid: id,
+  //     })
+  //     .then(() => {
+  //       console.log("SUCCESS");
+  //       Alert.info("Изменения сохранены");
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //       Alert.error("Something wrong");
+  //     });
+  // };
 
   const canReview = () => {
     setPublish(null);
@@ -137,7 +143,7 @@ const PhotoView = () => {
       .put(`/photo/ready/${id}`)
       .then(() => {
         Alert.info("Фото в ожидании проверки другими пользователями");
-        history.push("/my/photo");
+        history.goBack();
       })
       .catch((error) => {
         Alert.error(error);
@@ -150,7 +156,7 @@ const PhotoView = () => {
       .put(`/photo/publish/${id}`)
       .then(() => {
         Alert.info("Фото опубликовано");
-        history.push("/photo");
+        history.goBack();
       })
       .catch((error) => {
         Alert.error(error);
@@ -163,7 +169,7 @@ const PhotoView = () => {
       .delete(`/photo/${id}`)
       .then(() => {
         Alert.info("Записи успешно удалены");
-        history.push("/my/photo");
+        history.goBack();
       })
       .catch((error) => {
         Alert.error(error);
@@ -189,7 +195,7 @@ const PhotoView = () => {
           <Navbar.Body>
             <Nav>
               <Nav.Item
-                onClick={() => history.goBack()}
+                onClick={goBack}
                 icon={<Icon icon="chevron-circle-left" />}
               >
               К списку
@@ -244,10 +250,11 @@ const PhotoView = () => {
             <img
               src={image.url}
               alt={photo.title}
-              style={{ maxWidth: "100%", margin: "auto" }}
+              style={{ maxWidth: "100%", marginLeft : "auto", marginRight: "auto", height: "auto" }}
+              onClick={() => setPreview(image)}
             />
             <dl>
-              <dt>Оригинал</dt>
+              <dt>Размер оригинала</dt>
               <dd>
                 {photo.width} x {photo.height} px
               </dd>
