@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Modal, Button, Form, DatePicker, SelectPicker, Input } from "rsuite";
-import CustomFormField from "./CustomFormField";
-import { useAuthApi } from "../utils/authApi";
-import { todms } from "../utils/helper";
+import CustomFormField from "../CustomFormField";
+import { useAuthApi } from "../../utils/authApi";
+import { todms } from "../../utils/helper";
 
-const EditSub = ({ sub, onClose, onSubmit }) => {
+const EditSub = ({ sub, project, onClose, onSubmit }) => {
   const api = useAuthApi();
   const [formData, setFormData] = useState({
     uid: sub.uid || null,
     label: sub.label || "",
-    project: sub.project && sub.project.uid,
+    project: (project && project.uid) || (sub.project && sub.project.uid),
     series: sub.series || "",
     startdate: sub.startdate,
     enddate: sub.enddate,
@@ -18,12 +18,13 @@ const EditSub = ({ sub, onClose, onSubmit }) => {
     lat: (sub.location && todms(sub.location.coordinates[0])) || undefined,
     lng: (sub.location && todms(sub.location.coordinates[1])) || undefined,
   });
-
+  const seriesList = (project && project.seriesList) || (sub.project && sub.project.seriesList);
   const updateSub = () => {
     api
-      .post("/photo/submarine", formData)
+      .post("/submarine", formData)
       .then(() => {
         onSubmit();
+        onClose();
       })
       .catch(() => {
         console.log("ERROR");
@@ -62,7 +63,7 @@ const EditSub = ({ sub, onClose, onSubmit }) => {
           <CustomFormField
             name="series"
             label="Серия"
-            data={sub.project.seriesList.map((s)=>({
+            data={seriesList.map((s)=>({
               label: s,
               value: s,
             }))}
@@ -88,6 +89,7 @@ const EditSub = ({ sub, onClose, onSubmit }) => {
 
 EditSub.propTypes = {
   sub: PropTypes.object,
+  project: PropTypes.object,
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
 };

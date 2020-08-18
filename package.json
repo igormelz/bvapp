@@ -10,6 +10,7 @@
     "axios": "^0.19.2",
     "customize-cra": "^1.0.0-alpha.0",
     "esri-loader": "^2.14.0",
+    "graphql": "^15.3.0",
     "keycloak-js": "^10.0.1",
     "less": "^3.11.3",
     "less-loader": "^6.1.0",
@@ -20,7 +21,8 @@
     "react-responsive": "^8.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
-    "rsuite": "^4.5.0"
+    "rsuite": "^4.5.0",
+    "urql": "^1.10.0"
   },
   "scripts": {
     "start": "react-app-rewired start",

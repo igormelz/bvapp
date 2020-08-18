@@ -1,5 +1,5 @@
 import React from "react";
-import { Router, Route, Switch } from "react-router-dom";
+import { Router, Route, Switch, Redirect } from "react-router-dom";
 import history from "./utils/history";
 import { Container, Footer } from "rsuite";
 import MenuBar from "./components/MenuBar";
@@ -14,8 +14,7 @@ import SubMap from "./components/SubMap";
 import UserPhoto from "./views/UserPhoto";
 import Categories from "./views/Categories";
 import Heroes from "./views/Heroes";
-import SubmarineList from "./views/SubmarineList";
-import SubProjects from "./components/SubProjects";
+
 
 /** import dark css */
 // import 'rsuite/dist/styles/rsuite-dark.css';
@@ -23,17 +22,17 @@ import SubProjects from "./components/SubProjects";
 function App() {
   return (
     <Router history={history}>
-      <Container style={{ margin: "0px 20px 0px 20px" }}>
+      <Container>
         <MenuBar />
         <Switch>
           <Route path="/" exact component={Home} />
           <Route path="/photo" exact component={Photo} />
           <Route path="/map" exact component={SubMap} />
           <Route path="/submariners" exact component={Heroes} />
-          <Route path="/projects" exact component={SubProjects} />
-          <Route path="/submarine/:id" exact component={SubmarineList} />
           <Route path="/photo/:id" exact component={PhotoView} />
           <PrivateRoute path="/profile" component={Profile} />
+          <Route path="/admin" exact render={() => <Redirect to="/admin/main"/>} />
+          <PrivateRoute path="/admin" component={Categories} />
           <PrivateRoute exact path="/user/photos">
             <UserPhoto
               apipath="/photo/user"

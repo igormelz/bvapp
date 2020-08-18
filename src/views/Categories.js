@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
+import { createClient, Provider } from 'urql';
 import {
   Container,
   Content,
@@ -6,13 +7,14 @@ import {
   Icon,
   Sidebar,
   Sidenav,
-  Tree,
-  Panel,
 } from "rsuite";
-import axios from "axios";
-import EditEpoch from "../components/EditEpoch";
 
-import SubProjects from "../components/SubProjects";
+import HistEpoch from "../components/Types/HistEpoch";
+import SubProjects from "../components/Submarine/SubProjects";
+import Submarines from "../components/Submarine/Submarines";
+import { NavLink } from "../components/NavLink";
+import { Switch, Route } from "react-router-dom";
+import Fleet from "../components/Types/Fleet";
 
 const headerStyles = {
   padding: 18,
@@ -24,76 +26,47 @@ const headerStyles = {
   overflow: "hidden",
 };
 
-const Categories = () => {
-  const [showProjects, setShowProjects] = useState(false);
-  const [showEpoch, setShowEpoch] = useState(false);
-  const [epoch, setEpoch] = useState();
-  const [editEpoch, setEditEpoch] = useState();
+const client = createClient({
+  url: 'http://83.68.33.151:8080/graphql',
+});
 
-  const viewEpoch = useCallback(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/public/epoch`)
-      .then((response) => {
-        setEpoch(response.data.epoch);
-        setShowProjects(false);
-        setShowEpoch(true);
-      })
-      .catch((e) => console.log("err epoch:" + e));
-  }, []);
 
-  const canEditEpoch = (epoch) => {
-    setEditEpoch(epoch);
-  };
-
-  return (
-    <Container>
-      <Sidebar style={{ display: "flex", flexDirection: "column" }} width={200}>
-        <Sidenav.Header>
-          <div style={headerStyles}>Справочники</div>
-        </Sidenav.Header>
-        <Sidenav appearance="subtle">
-          <Sidenav.Body>
-            <Nav>
-              <Nav.Item
-                icon={<Icon icon="ship" />}
-                eventKey="1"
-                onClick={() => {
-                  setShowEpoch(false);
-                  setShowProjects(true);
-                }}
-              >
-                Типы подлодок
-              </Nav.Item>
-              <Nav.Item
-                icon={<Icon icon="calendar" />}
-                onClick={viewEpoch}
-                eventKey="2"
-              >
-                Эпохи
-              </Nav.Item>
-            </Nav>
-          </Sidenav.Body>
-        </Sidenav>
-      </Sidebar>
-      <Content>
-        {showEpoch && (
-          <Panel header="Исторические эпохи">
-            <Tree
-              data={epoch}
-              defaultExpandAll
-              cascade={false}
-              valueKey="uid"
-              onSelect={(node) => canEditEpoch(node)}
-            />
-          </Panel>
-        )}
-        {showProjects && <SubProjects />}
-      </Content>
-      {editEpoch && (
-        <EditEpoch epoch={editEpoch} onClose={() => setEditEpoch(null)} />
-      )}
-    </Container>
-  );
-};
+const Categories = () => (
+  <Provider value={client}>
+  <Container>
+    <Sidebar style={{ display: "flex", flexDirection: "column" }} width={200}>
+      <Sidenav.Header>
+        <div style={headerStyles}>Справочники</div>
+      </Sidenav.Header>
+      <Sidenav appearance="subtle">
+        <Sidenav.Body>
+          <Nav>
+            <NavLink href="/admin/epoch" icon={<Icon icon="calendar" />} eventKey="1">
+              Эпохи
+            </NavLink>
+            <NavLink href="/admin/project" icon={<Icon icon="tasks" />} eventKey="2">
+              Проекты
+            </NavLink>
+            <NavLink href="/admin/submarines" icon={<Icon icon="ship" />} eventKey="3">
+              Лодки
+            </NavLink>
+            <NavLink href="/admin/fleet" icon={<Icon icon="ship" />} eventKey="4">
+              Флоты
+            </NavLink>
+          </Nav>
+        </Sidenav.Body>
+      </Sidenav>
+    </Sidebar>
+    <Content>
+      <Switch>
+        <Route path="/admin/epoch" exact component={HistEpoch}/>
+        <Route path="/admin/project" exact component={SubProjects}/>
+        <Route path="/admin/submarines" exact component={Submarines}/>
+        <Route path="/admin/fleet" exact component={Fleet}/>
+      </Switch>
+    </Content>
+  </Container>
+  </Provider>
+);
 
 export default Categories;

@@ -10,7 +10,7 @@ import {
   Icon,
   Whisper,
 } from "rsuite";
-import EditSub from "../components/EditSub";
+import EditSub from "./EditSub";
 import axios from "axios";
 import { fmtDate } from "../utils/helper";
 import { useParams } from "react-router-dom";

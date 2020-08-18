@@ -8,16 +8,17 @@ import {
   ControlLabel,
   FormControl,
 } from "rsuite";
-import { useAuthApi } from "../utils/authApi";
+import { useAuthApi } from "../../utils/authApi";
 
-const ProjectEdit = ({ project, onClose }) => {
+const ProjectEdit = ({ project, onClose, onSubmit }) => {
   const [formData, setFormData] = useState(project);
   const api = useAuthApi();
 
   const submit = () => {
     api
-      .post("/photo/project", formData)
+      .post("/project", formData)
       .then(() => {
+        onSubmit();
         onClose();
       })
       .catch(() => {
@@ -67,6 +68,7 @@ const ProjectEdit = ({ project, onClose }) => {
 ProjectEdit.propTypes = {
   project: PropTypes.object,
   onClose: PropTypes.func,
+  onSubmit: PropTypes.func,
 };
 
 export default ProjectEdit;

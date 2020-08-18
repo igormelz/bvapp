@@ -26,9 +26,6 @@ const Default = ({ admin, userInfo, login, logout }) => (
             Подводники
           </span>
         </NavLink>
-        <Dropdown icon={<Icon icon="ship" />} title="П/Л">
-          <DropLink href="/projects">Проекты п/л</DropLink>
-        </Dropdown>
       </Nav>
       <Nav pullRight>
         {!userInfo && (
@@ -64,7 +61,7 @@ const Default = ({ admin, userInfo, login, logout }) => (
               </DropLink>
             )}
             {admin && (
-              <DropLink href="/categories" icon={<Icon icon="creative" />}>
+              <DropLink href="/admin/main" icon={<Icon icon="creative" />}>
                 Категории
               </DropLink>
             )}
